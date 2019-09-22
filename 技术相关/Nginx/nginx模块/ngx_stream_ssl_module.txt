@@ -1,37 +1,47 @@
-The ngx_stream_ssl_module module (1.9.0) provides the necessary support for a stream proxy server to work with the SSL/TLS protocol. This module is not built by default, it should be enabled with the --with-stream_ssl_module configuration parameter.
+The ngx_stream_ssl_module module (1.9.0) provides the necessary support for a stream proxy server to work with the SSL/TLS protocol. 
+为代理服务在SSL/TLS协议下工作提供必须的支持
+This module is not built by default, it should be enabled with the --with-stream_ssl_module configuration parameter.
+这个模块默认不会构建,需要加上配置参数
 
 Example Configuration
 To reduce the processor load, it is recommended to
-
 set the number of worker processes equal to the number of processors,
+为了减少处理器负载,建议设置工作进程数和处理器数量一致
+
 enable the shared session cache,
+允许共享session缓存
 disable the built-in session cache,
+禁用内置session缓存
 and possibly increase the session lifetime (by default, 5 minutes):
+并且可能增加session生命时间  默认5分钟
+
 worker_processes auto;
-
 stream {
-
     ...
-
     server {
         listen              12345 ssl;
-
         ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
         ssl_ciphers         AES128-SHA:AES256-SHA:RC4-SHA:DES-CBC3-SHA:RC4-MD5;
         ssl_certificate     /usr/local/nginx/conf/cert.pem;
         ssl_certificate_key /usr/local/nginx/conf/cert.key;
         ssl_session_cache   shared:SSL:10m;
         ssl_session_timeout 10m;
-
         ...
     }
 Directives
 Syntax:	ssl_certificate file;
 Default:	—
 Context:	stream, server
-Specifies a file with the certificate in the PEM format for the given server. If intermediate certificates should be specified in addition to a primary certificate, they should be specified in the same file in the following order: the primary certificate comes first, then the intermediate certificates. A secret key in the PEM format may be placed in the same file.
+Specifies a file with the certificate in the PEM format for the given server.
+If intermediate certificates should be specified in addition to a primary certificate, 
+they should be specified in the same file in the following order: the primary certificate comes first,
+then the intermediate certificates. A secret key in the PEM format may be placed in the same file.
+指定给定的服务器上面的PEM格式的认证文件
+如果在主认证文件之外额外指定一个中间的/过度的认证,他们需要以以下顺序在相同文件,主认证放在第一,然后额外的认证
+秘钥key也要放在相同文件
 
 Since version 1.11.0, this directive can be specified multiple times to load certificates of different types, for example, RSA and ECDSA:
+1.11.0以后,这个指定可以被指定多次来加载不同类型认证,比如RSA和ECDSA
 
 server {
     listen              12345 ssl;
@@ -44,31 +54,45 @@ server {
 
     ...
 }
-Only OpenSSL 1.0.2 or higher supports separate certificate chains for different certificates. With older versions, only one certificate chain can be used.
+
+Only OpenSSL 1.0.2 or higher supports separate certificate chains for different certificates. 
+只有1.0.2或者更高版本支持分离认证链来使用不同认证
+With older versions, only one certificate chain can be used.
+老版本只能使用一个认证链
 Since version 1.15.9, variables can be used in the file name when using OpenSSL 1.0.2 or higher:
+1.15.9以后,使用OpenSSL 1.0.2或者更高可以在文件中使用变量
 
 ssl_certificate     $ssl_server_name.crt;
 ssl_certificate_key $ssl_server_name.key;
 Note that using variables implies that a certificate will be loaded for each SSL handshake, and this may have a negative impact on performance.
+注意使用变量表明一个认证每次进行SSL握手都会加载,对性能有一定影响
 
-The value data:$variable can be specified instead of the file (1.15.10), which loads a certificate from a variable without using intermediate files. Note that inappropriate use of this syntax may have its security implications, such as writing secret key data to error log.
+The value data:$variable can be specified instead of the file (1.15.10), which loads a certificate from a variable without using intermediate files. 
+Note that inappropriate use of this syntax may have its security implications, such as writing secret key data to error log.
+数据值可以指定来替代文件(1.15.10),从一个变量而不是从一个文件加载一个认证
+不正当使用这个语法可能带来安全影响,比如讲秘钥key写日志文件
 
 Syntax:	ssl_certificate_key file;
 Default:	—
 Context:	stream, server
 Specifies a file with the secret key in the PEM format for the given server.
+为给定的服务器指定一个PEM格式的秘钥key文件
 
 The value engine:name:id can be specified instead of the file, which loads a secret key with a specified id from the OpenSSL engine name.
+值 引擎:名称:id 可以被指定用来替换文件,通过一个指定id来从OpenSSL 引擎名称来加载一个秘钥key
 
-The value data:$variable can be specified instead of the file (1.15.10), which loads a secret key from a variable without using intermediate files. Note that inappropriate use of this syntax may have its security implications, such as writing secret key data to error log.
+The value data:$variable can be specified instead of the file (1.15.10), which loads a secret key from a variable without using intermediate files. 
+Note that inappropriate use of this syntax may have its security implications, such as writing secret key data to error log.
 
 Since version 1.15.9, variables can be used in the file name when using OpenSSL 1.0.2 or higher.
+1.15.9以后,使用OpenSSL 1.0.2或者更高版本的时候可以在文件名中使用变量名称
 
 Syntax:	ssl_ciphers ciphers;
 Default:	
 ssl_ciphers HIGH:!aNULL:!MD5;
 Context:	stream, server
 Specifies the enabled ciphers. The ciphers are specified in the format understood by the OpenSSL library, for example:
+指定启动的密码,密码被指定为一个OpenSSL库可以理解的格式
 
 ssl_ciphers ALL:!aNULL:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
 The full list can be viewed using the “openssl ciphers” command.
@@ -79,8 +103,10 @@ Context:	stream, server
 This directive appeared in version 1.11.8.
 
 Specifies a file with trusted CA certificates in the PEM format used to verify client certificates.
+使用一个用来验证客户端证书的PEM格式的可信任CA证书文件
 
 The list of certificates will be sent to clients. If this is not desired, the ssl_trusted_certificate directive can be used.
+认证列表将会发送给客户端.如果没有要求,ssl_trusted_certificate 指令可以使用
 
 Syntax:	ssl_crl file;
 Default:	—
@@ -88,25 +114,32 @@ Context:	stream, server
 This directive appeared in version 1.11.8.
 
 Specifies a file with revoked certificates (CRL) in the PEM format used to verify client certificates.
+指定一个REM格式的吊销的认证文件来校验客户端认证信息
 
 Syntax:	ssl_dhparam file;
 Default:	—
 Context:	stream, server
 Specifies a file with DH parameters for DHE ciphers.
+为DHE密码指定一个带DH参数的文件
 
 By default no parameters are set, and therefore DHE ciphers will not be used.
-
+默认没有设置参数,因此DHE密码将不会使用
 Prior to version 1.11.0, builtin parameters were used by default.
+1.11.0版本后,内置参数默认被使用
+
 Syntax:	ssl_ecdh_curve curve;
 Default:	
 ssl_ecdh_curve auto;
 Context:	stream, server
 Specifies a curve for ECDHE ciphers.
 
+
 When using OpenSSL 1.0.2 or higher, it is possible to specify multiple curves (1.11.0), for example:
+当使用OpenSSL 1.0.2或者更高版本,指定多个curves是可能得
 
 ssl_ecdh_curve prime256v1:secp384r1;
 The special value auto (1.11.0) instructs nginx to use a list built into the OpenSSL library when using OpenSSL 1.0.2 or higher, or prime256v1 with older versions.
+
 
 Prior to version 1.11.0, the prime256v1 curve was used by default.
 Syntax:	ssl_handshake_timeout time;
@@ -263,9 +296,13 @@ The variable is supported only when using OpenSSL version 1.0.2 or higher. With 
 The variable is available only for new sessions.
 $ssl_protocol
 returns the protocol of an established SSL connection;
+建立的ssl连接的协议
 $ssl_server_name
 returns the server name requested through SNI;
+通过SNI请求得服务名称
 $ssl_session_id
 returns the session identifier of an established SSL connection;
+建立的SSl连接的session标识
 $ssl_session_reused
 returns “r” if an SSL session was reused, or “.” otherwise.
+如果SSL的session被重用,返回r否者返回.

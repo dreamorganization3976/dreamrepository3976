@@ -173,6 +173,7 @@ pidfile /var/run/redis_6379.pid
 # warning (only very important / critical messages are logged)
 loglevel notice
 
+# 日志文件路径
 # Specify the log file name. Also the empty string can be used to force
 # Redis to log on the standard output. Note that if you use standard
 # output for logging but daemonize, logs will be sent to /dev/null
@@ -690,6 +691,7 @@ replica-lazy-flush no
 # good enough in many applications, but an issue with the Redis process or
 # a power outage may result into a few minutes of writes lost (depending on
 # the configured save points).
+# 默认redis 异步存储数据集到硬盘,这个模式在大多应用里足够,但是一个redis进程问题或者停电可能导致几分钟的写操作丢失,依赖save points的配置
 #
 # The Append Only File is an alternative persistence mode that provides
 # much better durability. For instance using the default data fsync policy
@@ -697,6 +699,7 @@ replica-lazy-flush no
 # dramatic event like a server power outage, or a single write if something
 # wrong with the Redis process itself happens, but the operating system is
 # still running correctly.
+# aof文件是一个替换的持久化方式,提供更好的持久,在使用默认数据fsync策略时,redis可以只丢失一秒写操作
 #
 # AOF and RDB persistence can be enabled at the same time without problems.
 # If the AOF is enabled on startup Redis will load the AOF, that is the file
@@ -707,6 +710,7 @@ replica-lazy-flush no
 appendonly no
 
 # The name of the append only file (default: "appendonly.aof")
+# aof文件名称
 
 appendfilename "appendonly.aof"
 
@@ -715,10 +719,14 @@ appendfilename "appendonly.aof"
 # data on disk, some other OS will just try to do it ASAP.
 #
 # Redis supports three different modes:
+# redis 支持3种不同模式
 #
 # no: don't fsync, just let the OS flush the data when it wants. Faster.
+# 不进行 fsync, 让系统想进行的时候来flush,最快的
 # always: fsync after every write to the append only log. Slow, Safest.
+# 每个写命令都写, 慢,但是安全
 # everysec: fsync only one time every second. Compromise.
+# 每秒,折中
 #
 # The default is "everysec", as that's usually the right compromise between
 # speed and data safety. It's up to you to understand if you can relax this to
@@ -805,12 +813,15 @@ aof-load-truncated yes
 # When rewriting the AOF file, Redis is able to use an RDB preamble in the
 # AOF file for faster rewrites and recoveries. When this option is turned
 # on the rewritten AOF file is composed of two different stanzas:
+# 重写aof文件时,redis可以在aof文件中使用rdb前序来加速重写和恢复.
+# 当这个选项开启的时候,重写的aof文件由2个不同的段组成
 #
 #   [RDB file][AOF tail]
 #
 # When loading Redis recognizes that the AOF file starts with the "REDIS"
 # string and loads the prefixed RDB file, and continues loading the AOF
 # tail.
+# 当redis加载的时候发现aop文件以redis 字符串开头,则先加载rdb文件,随后加载aof
 aof-use-rdb-preamble yes
 
 ################################ LUA SCRIPTING  ###############################
@@ -1384,3 +1395,4 @@ rdb-save-incremental-fsync yes
 # the main dictionary scan
 # active-defrag-max-scan-fields 1000
 
+# slaveof 127.0.0.1 6379

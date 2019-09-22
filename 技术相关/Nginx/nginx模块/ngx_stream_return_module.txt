@@ -1,12 +1,20 @@
+已完结
+
+
 The ngx_stream_return_module module (1.11.2) allows sending a specified value to the client and then closing the connection.
+
+允许发送一个指定的值给客户端并且随后关闭连接
 
 Example Configuration
 server {
     listen 12345;
     return $time_iso8601;
 }
+
 Directives
 Syntax:	return value;
 Default:	—
 Context:	server
+
+指定一个要发送给客户端的值,这个值可以包含文本,变量或者两者结合
 Specifies a value to send to the client. The value can contain text, variables, and their combination.
